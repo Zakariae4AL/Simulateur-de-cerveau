@@ -1,5 +1,7 @@
 # Brain Simulator (C++)
 
+[![build](https://github.com/YOUR-USERNAME/brain-simulator/actions/workflows/build.yml/badge.svg)](https://github.com/YOUR-USERNAME/brain-simulator/actions/workflows/build.yml)
+
 *[Version française](README.md)*
 
 A terminal program that shows how the brain works, using real models from computational neuroscience:
@@ -29,6 +31,10 @@ Green = excitatory neurons, red = inhibitory. The vertical stripes are neurons f
 Four neuron types get the same input current and each one answers in its own way.
 
 <p align="center"><img src="images/neurons.png" alt="Neuron types" width="750"></p>
+
+## Download (Windows)
+
+No compiler needed: download `brain-simulator-windows.zip` from the [Releases](https://github.com/YOUR-USERNAME/brain-simulator/releases/latest) page, unzip it, and run `brain.exe` (terminal) or `brain-live.exe` (animated window).
 
 ## Build & run
 
@@ -73,6 +79,18 @@ On Windows with MinGW (g++): add `-G "MinGW Makefiles"` to the first command, th
 | R | build a new random brain |
 | Esc | quit |
 
+## Tests
+
+18 unit tests check that the science stays correct: a neuron without input never fires, firing rates are realistic, the spectrum finds a 10 Hz rhythm, STDP learns the bell but not the light, and more.
+
+```bash
+cmake -S . -B build
+cmake --build build --config Release
+ctest --test-dir build --build-config Release --output-on-failure
+```
+
+On every push, GitHub Actions builds the project and runs the tests on Windows, Linux and macOS (badge at the top of the page).
+
 ## Project structure
 
 ```
@@ -85,6 +103,11 @@ include/
 src/
   main.cpp      the three experiments and the menu (terminal)
   live.cpp      the live SFML version
+tests/
+  tests.cpp     unit tests
+.github/workflows/
+  build.yml     automatic build + tests (CI)
+  release.yml   publishes the .exe files to GitHub Releases
 ```
 
 ## The science

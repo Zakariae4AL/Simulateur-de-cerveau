@@ -17,6 +17,14 @@
 #include <vector>
 
 #ifdef _WIN32
+// windows.h defines macros called min and max that break std::min/std::max.
+// NOMINMAX turns them off; WIN32_LEAN_AND_MEAN skips parts we don't need.
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
 #include <windows.h>
 #endif
 

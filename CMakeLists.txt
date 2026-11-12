@@ -18,6 +18,22 @@ else()
   target_compile_options(brain PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
+# --- Unit tests (no dependencies) ---------------------------------------------
+# Run with:  ctest --test-dir build --output-on-failure
+option(BRAIN_TESTS "Build the unit tests (brain-tests)" ON)
+
+if(BRAIN_TESTS)
+  enable_testing()
+  add_executable(brain-tests tests/tests.cpp)
+  target_include_directories(brain-tests PRIVATE include)
+  if(MSVC)
+    target_compile_options(brain-tests PRIVATE /W4)
+  else()
+    target_compile_options(brain-tests PRIVATE -Wall -Wextra -Wpedantic)
+  endif()
+  add_test(NAME brain-tests COMMAND brain-tests)
+endif()
+
 # --- Live graphics version (SFML) --------------------------------------------
 # Turn on with:  cmake -S . -B build -DBRAIN_LIVE=ON
 # SFML is downloaded and built automatically, so it always matches your compiler.
