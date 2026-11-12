@@ -1,0 +1,42 @@
+# Creates a GitHub Release with ready-to-run Windows programs
+# when you push a version tag, for example:  git tag v1.0.0 && git push origin v1.0.0
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure (static runtime, so the .exe runs on any PC)
+        run: >
+          cmake -S . -B build -DBRAIN_LIVE=ON
+          -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
+          -DSFML_USE_STATIC_STD_LIBS=ON
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Test
+        run: ctest --test-dir build --build-config Release --output-on-failure
+
+      - name: Package
+        shell: bash
+        run: |
+          mkdir brain-simulator-windows
+          cp build/Release/brain.exe build/Release/brain-live.exe brain-simulator-windows/
+          cp README.md README.en.md brain-simulator-windows/
+          7z a brain-simulator-windows.zip brain-simulator-windows
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: brain-simulator-windows.zip
+          generate_release_notes: true
