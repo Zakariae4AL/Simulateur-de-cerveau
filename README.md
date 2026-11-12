@@ -1,5 +1,7 @@
 # Simulateur de Cerveau (C++)
 
+[![build](https://github.com/YOUR-USERNAME/brain-simulator/actions/workflows/build.yml/badge.svg)](https://github.com/YOUR-USERNAME/brain-simulator/actions/workflows/build.yml)
+
 *[English version](README.en.md)*
 
 Un programme en terminal qui montre comment fonctionne le cerveau, avec de vrais modèles issus des neurosciences computationnelles :
@@ -29,6 +31,10 @@ En vert les neurones excitateurs, en rouge les inhibiteurs. Les bandes verticale
 Quatre types de neurones reçoivent le même courant et répondent chacun à leur manière.
 
 <p align="center"><img src="images/neurons.png" alt="Types de neurones" width="750"></p>
+
+## Télécharger (Windows)
+
+Pas besoin de compiler : téléchargez `brain-simulator-windows.zip` depuis la page [Releases](https://github.com/YOUR-USERNAME/brain-simulator/releases/latest), décompressez-le, puis lancez `brain.exe` (terminal) ou `brain-live.exe` (fenêtre animée).
 
 ## Compiler et lancer
 
@@ -91,6 +97,18 @@ Sous Windows avec MinGW (g++) : ajoutez `-G "MinGW Makefiles"` à la première c
 | R | créer un nouveau cerveau aléatoire |
 | Échap | quitter |
 
+## Tests
+
+18 tests unitaires vérifient que la science reste correcte : un neurone sans entrée ne s'active jamais, les taux de décharge sont réalistes, l'analyse spectrale trouve un rythme de 10 Hz, la STDP apprend la cloche mais pas la lumière, etc.
+
+```bash
+cmake -S . -B build
+cmake --build build --config Release
+ctest --test-dir build --build-config Release --output-on-failure
+```
+
+À chaque push, GitHub Actions compile le projet et lance les tests sous Windows, Linux et macOS (badge en haut de la page).
+
 ## Structure du projet
 
 ```
@@ -103,6 +121,11 @@ include/
 src/
   main.cpp      les trois expériences et le menu (terminal)
   live.cpp      la version live avec SFML
+tests/
+  tests.cpp     les tests unitaires
+.github/workflows/
+  build.yml     compilation + tests automatiques (CI)
+  release.yml   publication des .exe sur GitHub Releases
 ```
 
 ## La science derrière le projet
