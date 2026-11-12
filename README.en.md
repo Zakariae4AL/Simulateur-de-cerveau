@@ -10,7 +10,31 @@ A terminal program that shows how the brain works, using real models from comput
 
 No libraries needed: pure C++17 and ASCII graphics.
 
+## Preview
+
+### 🧠 Experiment 3: a neuron that learns (Pavlov's dog)
+
+Before training, the bell triggers nothing (0 spikes). After 40 bell + food pairings, the bell synapses grow from 0.25 to 3.1 and **the bell alone makes the neuron fire** (6 spikes). The light, never paired with food, is still ignored.
+
+<p align="center"><img src="images/learning.png" alt="STDP learning" width="600"></p>
+
+### 🌊 Experiment 2: 1000 neurons produce brain waves
+
+Green = excitatory neurons, red = inhibitory. The vertical stripes are neurons firing together. Nobody programmed these rhythms.
+
+<p align="center"><img src="images/brain-waves.png" alt="Brain waves" width="750"></p>
+
+### ⚡ Experiment 1: how a neuron fires
+
+Four neuron types get the same input current and each one answers in its own way.
+
+<p align="center"><img src="images/neurons.png" alt="Neuron types" width="750"></p>
+
 ## Build & run
+
+With g++ (simplest): `g++ -std=c++17 -O2 -Iinclude src/main.cpp -o brain`
+
+With CMake:
 
 ```bash
 cmake -S . -B build
@@ -19,8 +43,6 @@ cmake --build build --config Release
 ./build/brain neurons    # or: cortex | learn | all
 ./build/brain all --no-color
 ```
-
-Without CMake: `g++ -std=c++17 -O2 -Iinclude src/main.cpp -o brain`
 
 On Windows, the executable is in `build\Release\brain.exe`.
 

@@ -10,6 +10,26 @@ Un programme en terminal qui montre comment fonctionne le cerveau, avec de vrais
 
 Aucune bibliothèque externe : du C++17 pur et des graphiques en ASCII.
 
+## Aperçu
+
+### 🧠 Expérience 3 : un neurone qui apprend (chien de Pavlov)
+
+Avant l'entraînement, la cloche ne déclenche rien (0 spike). Après 40 associations cloche + nourriture, les synapses de la cloche passent de 0,25 à 3,1 et **la cloche seule déclenche le neurone** (6 spikes). La lumière, jamais associée à la nourriture, reste ignorée.
+
+<p align="center"><img src="images/learning.png" alt="Apprentissage STDP" width="600"></p>
+
+### 🌊 Expérience 2 : 1000 neurones produisent des ondes cérébrales
+
+En vert les neurones excitateurs, en rouge les inhibiteurs. Les bandes verticales montrent les neurones qui s'activent ensemble. Personne n'a programmé ces rythmes.
+
+<p align="center"><img src="images/brain-waves.png" alt="Ondes cérébrales" width="750"></p>
+
+### ⚡ Expérience 1 : comment un neurone émet des spikes
+
+Quatre types de neurones reçoivent le même courant et répondent chacun à leur manière.
+
+<p align="center"><img src="images/neurons.png" alt="Types de neurones" width="750"></p>
+
 ## Compiler et lancer
 
 **Avec g++ (le plus simple) :**
