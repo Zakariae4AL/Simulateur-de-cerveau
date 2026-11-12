@@ -1,4 +1,6 @@
 build/
+build-live/
 *.exe
 brain
+brain-live
 .vscode/
