@@ -1,6 +1,6 @@
 # Brain Simulator (C++)
 
-[![build](https://github.com/YOUR-USERNAME/brain-simulator/actions/workflows/build.yml/badge.svg)](https://github.com/YOUR-USERNAME/brain-simulator/actions/workflows/build.yml)
+[![build](https://github.com/Zakariae4AL/Simulateur-de-cerveau/actions/workflows/build.yml/badge.svg)](https://github.com/Zakariae4AL/Simulateur-de-cerveau/actions/workflows/build.yml)
 
 *[Version française](README.md)*
 
@@ -34,7 +34,7 @@ Four neuron types get the same input current and each one answers in its own way
 
 ## Download (Windows)
 
-No compiler needed: download `brain-simulator-windows.zip` from the [Releases](https://github.com/YOUR-USERNAME/brain-simulator/releases/latest) page, unzip it, and run `brain.exe` (terminal) or `brain-live.exe` (animated window).
+No compiler needed: download `brain-simulator-windows.zip` from the [Releases](https://github.com/Zakariae4AL/Simulateur-de-cerveau/releases/latest) page, unzip it, and run `brain.exe` (terminal) or `brain-live.exe` (animated window).
 
 ## Build & run
 
