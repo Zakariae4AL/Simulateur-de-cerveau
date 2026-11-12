@@ -46,6 +46,33 @@ cmake --build build --config Release
 
 On Windows, the executable is in `build\Release\brain.exe`.
 
+## 🎬 Live version (SFML)
+
+A window where the 1000 neurons flash live when they fire, with an EEG-style trace and brain wave bands updated in real time. In the animation, **S** is pressed: 200 neurons get a stimulus, the whole network bursts, then goes quiet while the neurons recover.
+
+<p align="center"><img src="images/live.gif" alt="Live version" width="800"></p>
+
+**Build** (CMake downloads and builds SFML automatically; the first build takes a few minutes):
+
+```bash
+cmake -S . -B build-live -DBRAIN_LIVE=ON
+cmake --build build-live --config Release
+./build-live/brain-live
+```
+
+On Windows with MinGW (g++): add `-G "MinGW Makefiles"` to the first command, then run `.\build-live\brain-live.exe`.
+
+**Controls:**
+
+| Key | Action |
+|---|---|
+| Space | pause / resume |
+| Up / Down | simulation speed |
+| Left / Right | weaker / stronger sensory input |
+| S | stimulate 200 neurons (like a sudden touch) |
+| R | build a new random brain |
+| Esc | quit |
+
 ## Project structure
 
 ```
@@ -56,7 +83,8 @@ include/
   plot.hpp      ASCII plotting (voltage traces, bars, histograms)
   color.hpp     ANSI terminal colors
 src/
-  main.cpp      the three experiments and the menu
+  main.cpp      the three experiments and the menu (terminal)
+  live.cpp      the live SFML version
 ```
 
 ## The science
@@ -82,7 +110,6 @@ Because the bell always comes just before food makes the neuron fire, bell synap
 ## Ideas to extend it
 
 - **Extinction:** ring the bell many times without food. Can you add a rule that makes the neuron "forget"?
-- **Visual graphics:** draw the network live with SFML or raylib (neurons light up when they fire).
 - **Pattern recognition:** train output neurons with STDP + lateral inhibition to recognize digits (Diehl & Cook, 2015).
 - **Sleep:** reduce the noise input and see slow waves (delta) appear.
 - **Performance:** make the network 10,000 neurons with sparse connections and multithreading.

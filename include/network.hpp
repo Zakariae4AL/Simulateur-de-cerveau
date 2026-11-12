@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <random>
+#include <utility>
 #include <vector>
 
 // =============================================================================
@@ -32,7 +33,7 @@ public:
     CorticalNetwork(int excitatory = 800, int inhibitory = 200, unsigned seed = 42)
         : Ne_(excitatory), Ni_(inhibitory), N_(excitatory + inhibitory),
           a_(N_), b_(N_), c_(N_), d_(N_), v_(N_), u_(N_),
-          S_(static_cast<size_t>(N_) * N_), I_(N_), rng_(seed) {
+          S_(static_cast<size_t>(N_) * N_), I_(N_), extra_(N_, 0.0), rng_(seed) {
         std::uniform_real_distribution<double> U(0.0, 1.0);
 
         // Excitatory: mostly regular spiking, a few bursting/chattering cells.
@@ -63,46 +64,64 @@ public:
                     pre < Ne_ ? 0.5 * U(rng_) : -U(rng_);
     }
 
+    // Simulate ONE millisecond. Returns the indices of the neurons that fired.
+    // (The live SFML view calls this once per millisecond to animate the brain.)
+    const std::vector<int>& step() {
+        // 1) random sensory (thalamic) input, scaled by noiseScale
+        for (int i = 0; i < N_; ++i)
+            I_[i] = (i < Ne_ ? 5.0 : 2.0) * noiseScale_ * noise_(rng_) + extra_[i];
+        std::fill(extra_.begin(), extra_.end(), 0.0);
+
+        // 2) who fires now?
+        fired_.clear();
+        for (int i = 0; i < N_; ++i) {
+            if (v_[i] >= 30.0) {
+                fired_.push_back(i);
+                v_[i] = c_[i];
+                u_[i] += d_[i];
+            }
+        }
+
+        // 3) spikes travel through synapses to all other neurons
+        for (int pre : fired_) {
+            const double* row = &S_[static_cast<size_t>(pre) * N_];
+            for (int post = 0; post < N_; ++post) I_[post] += row[post];
+        }
+
+        // 4) update every neuron's voltage
+        for (int i = 0; i < N_; ++i) {
+            v_[i] += 0.5 * (0.04 * v_[i] * v_[i] + 5.0 * v_[i] + 140.0 - u_[i] + I_[i]);
+            v_[i] += 0.5 * (0.04 * v_[i] * v_[i] + 5.0 * v_[i] + 140.0 - u_[i] + I_[i]);
+            v_[i] = std::min(v_[i], 30.0);  // keep numbers sane on a spike
+            u_[i] += a_[i] * (b_[i] * v_[i] - u_[i]);
+        }
+        ++t_;
+        return fired_;
+    }
+
     // Simulate `ms` milliseconds and return every spike that happened.
     std::vector<Spike> run(int ms) {
         std::vector<Spike> spikes;
-        std::normal_distribution<double> noise(0.0, 1.0);
-        std::vector<int> fired;
-        fired.reserve(N_);
-
-        for (int step = 0; step < ms; ++step, ++t_) {
-            // 1) random sensory (thalamic) input
-            for (int i = 0; i < N_; ++i)
-                I_[i] = (i < Ne_ ? 5.0 : 2.0) * noise(rng_);
-
-            // 2) who fires now?
-            fired.clear();
-            for (int i = 0; i < N_; ++i) {
-                if (v_[i] >= 30.0) {
-                    fired.push_back(i);
-                    spikes.push_back({t_, i});
-                    v_[i] = c_[i];
-                    u_[i] += d_[i];
-                }
-            }
-
-            // 3) spikes travel through synapses to all other neurons
-            for (int pre : fired) {
-                const double* row = &S_[static_cast<size_t>(pre) * N_];
-                for (int post = 0; post < N_; ++post) I_[post] += row[post];
-            }
-
-            // 4) update every neuron's voltage
-            for (int i = 0; i < N_; ++i) {
-                v_[i] += 0.5 * (0.04 * v_[i] * v_[i] + 5.0 * v_[i] + 140.0 - u_[i] + I_[i]);
-                v_[i] += 0.5 * (0.04 * v_[i] * v_[i] + 5.0 * v_[i] + 140.0 - u_[i] + I_[i]);
-                v_[i] = std::min(v_[i], 30.0);  // keep numbers sane on a spike
-                u_[i] += a_[i] * (b_[i] * v_[i] - u_[i]);
-            }
+        noise_.reset();
+        for (int k = 0; k < ms; ++k) {
+            int now = t_;
+            for (int i : step()) spikes.push_back({now, i});
         }
         return spikes;
     }
 
+    // Give `count` neurons starting at `first` an extra input current during
+    // the next millisecond, like touching the skin or flashing a light.
+    void stimulate(int first, int count, double current) {
+        for (int i = std::max(0, first); i < std::min(N_, first + count); ++i) extra_[i] += current;
+    }
+
+    // Strength of the random sensory input (1.0 = normal, 0.0 = silence).
+    void setNoiseScale(double s) { noiseScale_ = std::max(0.0, s); }
+    double noiseScale() const { return noiseScale_; }
+
+    double voltage(int i) const { return v_[i]; }
+    int timeMs() const { return t_; }
     int excitatory() const { return Ne_; }
     int inhibitory() const { return Ni_; }
     int size() const { return N_; }
@@ -112,16 +131,20 @@ private:
     std::vector<double> a_, b_, c_, d_, v_, u_;
     std::vector<double> S_;  // synaptic weights [pre][post]
     std::vector<double> I_;  // input current this ms
+    std::vector<double> extra_; // extra stimulus for the next ms
+    std::vector<int> fired_; // neurons that fired in the last step
     std::mt19937 rng_;
+    std::normal_distribution<double> noise_{0.0, 1.0};
+    double noiseScale_ = 1.0;
     int t_ = 0;
 };
 
 // Power spectrum of the population activity (spikes per ms), like an EEG.
 // Returns power for every whole frequency from 0 Hz to maxHz (index = Hz).
-inline std::vector<double> powerSpectrum(const std::vector<Spike>& spikes, int ms, int maxHz = 100) {
-    std::vector<double> x(ms, 0.0);
-    for (const auto& s : spikes)
-        if (s.time_ms >= 0 && s.time_ms < ms) x[s.time_ms] += 1.0;
+// `x` holds the number of spikes in each millisecond.
+inline std::vector<double> powerSpectrum(std::vector<double> x, int maxHz = 100) {
+    const int ms = static_cast<int>(x.size());
+    if (ms < 2) return std::vector<double>(maxHz + 1, 0.0);
 
     double mean = 0.0;
     for (double v : x) mean += v;
@@ -143,6 +166,14 @@ inline std::vector<double> powerSpectrum(const std::vector<Spike>& spikes, int m
         power[f] = (re * re + im * im) / ms;
     }
     return power;
+}
+
+// Same, starting from a list of spikes recorded over `ms` milliseconds.
+inline std::vector<double> powerSpectrum(const std::vector<Spike>& spikes, int ms, int maxHz = 100) {
+    std::vector<double> x(ms, 0.0);
+    for (const auto& s : spikes)
+        if (s.time_ms >= 0 && s.time_ms < ms) x[s.time_ms] += 1.0;
+    return powerSpectrum(std::move(x), maxHz);
 }
 
 struct Band {
