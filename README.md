@@ -64,6 +64,33 @@ Sous Windows, l'exécutable se trouve dans `build\Release\brain.exe`.
 
 Astuce : agrandissez la fenêtre du terminal, certains graphiques font environ 110 caractères de large.
 
+## 🎬 Version live (SFML)
+
+Une fenêtre où les 1000 neurones s'allument en direct quand ils s'activent, avec un tracé type EEG et les bandes d'ondes cérébrales mises à jour en temps réel. Dans l'animation, on appuie sur **S** : 200 neurones reçoivent une stimulation, tout le réseau s'emballe, puis se tait le temps que les neurones récupèrent.
+
+<p align="center"><img src="images/live.gif" alt="Version live" width="800"></p>
+
+**Compiler** (CMake télécharge et compile SFML automatiquement, la première fois prend quelques minutes) :
+
+```bash
+cmake -S . -B build-live -DBRAIN_LIVE=ON
+cmake --build build-live --config Release
+./build-live/brain-live
+```
+
+Sous Windows avec MinGW (g++) : ajoutez `-G "MinGW Makefiles"` à la première commande, puis lancez `.\build-live\brain-live.exe`.
+
+**Commandes :**
+
+| Touche | Action |
+|---|---|
+| Espace | pause / reprise |
+| Haut / Bas | vitesse de la simulation |
+| Gauche / Droite | entrée sensorielle plus faible / plus forte |
+| S | stimuler 200 neurones (comme un contact soudain) |
+| R | créer un nouveau cerveau aléatoire |
+| Échap | quitter |
+
 ## Structure du projet
 
 ```
@@ -74,7 +101,8 @@ include/
   plot.hpp      graphiques ASCII (tension, barres, histogrammes)
   color.hpp     couleurs du terminal (ANSI)
 src/
-  main.cpp      les trois expériences et le menu
+  main.cpp      les trois expériences et le menu (terminal)
+  live.cpp      la version live avec SFML
 ```
 
 ## La science derrière le projet
@@ -100,7 +128,6 @@ Comme la cloche arrive toujours juste avant que la nourriture fasse réagir le n
 ## Idées pour aller plus loin
 
 - **Extinction** : faire sonner la cloche plusieurs fois sans nourriture. Pouvez-vous ajouter une règle qui fait « oublier » le neurone ?
-- **Graphiques en temps réel** : dessiner le réseau avec SFML ou raylib (les neurones s'allument quand ils s'activent).
 - **Reconnaissance de formes** : entraîner des neurones de sortie avec STDP et inhibition latérale pour reconnaître des chiffres manuscrits (Diehl & Cook, 2015).
 - **Sommeil** : réduire le bruit d'entrée et observer l'apparition d'ondes lentes (delta).
 - **Performance** : passer à 10 000 neurones avec des connexions creuses et du multithreading.
