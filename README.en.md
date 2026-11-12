@@ -1,0 +1,71 @@
+# Brain Simulator (C++)
+
+*[Version française](README.md)*
+
+A terminal program that shows how the brain works, using real models from computational neuroscience:
+
+1. **Neurons** – how a single neuron fires spikes, and how 4 real neuron types behave differently.
+2. **Cortex** – 1000 connected neurons that produce brain waves (alpha, beta, gamma) by themselves.
+3. **Learning** – Pavlov's dog: a neuron learns that a bell means food, using STDP (the learning rule real synapses use).
+
+No libraries needed: pure C++17 and ASCII graphics.
+
+## Build & run
+
+```bash
+cmake -S . -B build
+cmake --build build --config Release
+./build/brain            # interactive menu
+./build/brain neurons    # or: cortex | learn | all
+./build/brain all --no-color
+```
+
+Without CMake: `g++ -std=c++17 -O2 -Iinclude src/main.cpp -o brain`
+
+On Windows, the executable is in `build\Release\brain.exe`.
+
+## Project structure
+
+```
+include/
+  neuron.hpp    Izhikevich neuron model + 4 neuron types
+  network.hpp   1000-neuron cortical network + EEG-style spectrum analysis
+  learning.hpp  Pavlovian conditioning circuit with STDP learning
+  plot.hpp      ASCII plotting (voltage traces, bars, histograms)
+  color.hpp     ANSI terminal colors
+src/
+  main.cpp      the three experiments and the menu
+```
+
+## The science
+
+**Neuron model (Izhikevich, 2003).** Two equations describe a neuron's voltage `v` and recovery `u`:
+
+```
+v' = 0.04v² + 5v + 140 − u + I
+u' = a(bv − u)
+if v ≥ 30 mV:  v = c,  u = u + d     (spike!)
+```
+
+Changing only `a, b, c, d` gives regular spiking, bursting, chattering or fast-spiking neurons.
+
+**Cortical network.** 800 excitatory + 200 inhibitory neurons, randomly connected, with random sensory noise. Excitation spreads activity, inhibition stops it, and this push-pull makes neurons synchronize into rhythms. The program measures them with a Fourier transform, like an EEG analysis.
+
+**Learning (STDP).** Spike-Timing-Dependent Plasticity (Bi & Poo, 1998):
+- input fires just **before** the output → synapse gets **stronger**
+- input fires just **after** the output → synapse gets **weaker**
+
+Because the bell always comes just before food makes the neuron fire, bell synapses grow until the bell alone triggers the neuron. The light is never followed by food, so it stays ignored.
+
+## Ideas to extend it
+
+- **Extinction:** ring the bell many times without food. Can you add a rule that makes the neuron "forget"?
+- **Visual graphics:** draw the network live with SFML or raylib (neurons light up when they fire).
+- **Pattern recognition:** train output neurons with STDP + lateral inhibition to recognize digits (Diehl & Cook, 2015).
+- **Sleep:** reduce the noise input and see slow waves (delta) appear.
+- **Performance:** make the network 10,000 neurons with sparse connections and multithreading.
+
+## References
+
+- E. M. Izhikevich, *Simple Model of Spiking Neurons*, IEEE Trans. Neural Networks, 2003
+- G. Bi & M. Poo, *Synaptic Modifications in Cultured Hippocampal Neurons*, J. Neuroscience, 1998
